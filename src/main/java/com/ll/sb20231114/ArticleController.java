@@ -6,12 +6,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class ArticleController {
-    private Article lastArticle;
+    private List<Article> articles = new ArrayList<>();
 
     @GetMapping("/article/write")
     String showWrite() {
@@ -20,23 +20,44 @@ public class ArticleController {
 
     @GetMapping("/article/doWrite")
     @ResponseBody
-    Map<String, Object> doWrite(
+    RsData doWrite(
             String title,
             String body
     ) {
-        lastArticle = new Article(1, title, body);
+        Article article = new Article(articles.size() + 1, title, body);
+        articles.add(article);
 
-        Map<String, Object> rs = new HashMap<>();
-        rs.put("msg", "1번 게시물이 작성되었습니다.");
-        rs.put("data", lastArticle);
+        RsData<Article> rs = new RsData<>(
+                "S-1",
+                "%d번 게시물이 작성되었습니다.".formatted(article.getId()),
+                article
+        );
+
+        String resultCode = rs.getResultCode();
+        String msg = rs.getMsg();
+        Article _article = rs.getData();
 
         return rs;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    class RsData<T> {
+        private String resultCode;
+        private String msg;
+        private T data;
     }
 
     @GetMapping("/article/getLastArticle")
     @ResponseBody
     Article getLastArticle() {
-        return lastArticle;
+        return articles.getLast();
+    }
+
+    @GetMapping("/article/getArticles")
+    @ResponseBody
+    List<Article> getArticles() {
+        return articles;
     }
 }
 
