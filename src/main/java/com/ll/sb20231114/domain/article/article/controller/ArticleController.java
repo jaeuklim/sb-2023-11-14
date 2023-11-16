@@ -3,7 +3,6 @@ package com.ll.sb20231114.domain.article.article.controller;
 import com.ll.sb20231114.domain.article.article.entity.Article;
 import com.ll.sb20231114.domain.article.article.service.ArticleService;
 import com.ll.sb20231114.global.rq.Rq;
-import com.ll.sb20231114.global.rsData.RsData;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -25,6 +25,15 @@ import java.util.List;
 public class ArticleController {
     private final ArticleService articleService;
     private final Rq rq;
+
+    @GetMapping("/article/detail/{id}")
+    String showDetail(Model model, @PathVariable long id) {
+        Article article = articleService.findById(id).get();
+
+        model.addAttribute("article", article);
+
+        return "article/detail";
+    }
 
     @GetMapping("/article/write")
     String showWrite() {
@@ -41,22 +50,12 @@ public class ArticleController {
 
     @PostMapping("/article/write")
     @ResponseBody
-    RsData write(@Valid WriteForm writeForm) {
+    String write(@Valid WriteForm writeForm) {
         Article article = articleService.write(writeForm.title, writeForm.body);
 
-        RsData<Article> rs = new RsData<>(
-                "S-1",
-                "%d번 게시물이 작성되었습니다.".formatted(article.getId()),
-                article
-        );
+        String msg = "id %d, article created".formatted(article.getId());
 
-
-
-        String resultCode = rs.getResultCode();
-        String msg = rs.getMsg();
-        Article _article = rs.getData();
-
-        return rs;
+        return "redirect:/article/list?msg=" + msg;
     }
 
     @GetMapping("/article/list")
