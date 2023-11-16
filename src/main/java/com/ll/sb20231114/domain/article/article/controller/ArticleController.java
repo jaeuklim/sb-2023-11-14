@@ -50,6 +50,8 @@ public class ArticleController {
                 article
         );
 
+
+
         String resultCode = rs.getResultCode();
         String msg = rs.getMsg();
         Article _article = rs.getData();
@@ -57,7 +59,14 @@ public class ArticleController {
         return rs;
     }
 
+    @GetMapping("/article/list")
+    String showList(Model model) {
+        List<Article> articles = articleService.findAll();
 
+        model.addAttribute("articles", articles);
+
+        return "article/list";
+    }
 
 
     @GetMapping("/article/getLastArticle")
